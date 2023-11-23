@@ -17,7 +17,7 @@ jobs:
           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
             CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
             VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
-            echo "chart=$CHART >> "$GITHUB_OUTPUT"
+            echo "chart=$CHART" >> "$GITHUB_OUTPUT"
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
             if [ ! -z "$VERSION" ]; then
               break
