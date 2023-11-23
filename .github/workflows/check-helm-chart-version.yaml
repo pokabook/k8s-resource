@@ -25,7 +25,10 @@ jobs:
           done
 
       - name: Trigger workflow in another repository
-        uses: peter-evans/repository-dispatch@v1
+        uses: peter-evans/repository-dispatch@v2
+        run: |
+          echo ${{ steps.chart.outputs.chart }}
+          echo ${{ steps.chart.outputs.version }}
         with:
           token: ${{ secrets.TOKEN }}
           repository: pokabook/xquare-infrastructure-global
