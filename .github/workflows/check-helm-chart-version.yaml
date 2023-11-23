@@ -19,7 +19,7 @@ jobs:
             CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
             VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
             echo "$CHART=$VERSION"
-            gh api repos/pokabook/xquare-infrastructure-global/dispatches --raw-field event_type=chart-update --raw-field client_payload='{"chart": "'$CHART'", "version": "'$VERSION'"}'
+            gh api repos/pokabook/xquare-infrastructure-global/dispatches -XPOST -F event_type=chart-update -F client_payload='{"chart": "'$CHART'", "version": "'$VERSION'"}'
           done
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
