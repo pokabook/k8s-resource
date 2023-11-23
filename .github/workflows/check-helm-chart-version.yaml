@@ -14,10 +14,15 @@ jobs:
       - name: Get chart name and version
         id: chart
         run: |
-          CHART=$(basename $(dirname ${{ github.event.head_commit.modified }}))
-          VERSION=$(cat charts/$CHART/Chart.yaml | grep version: | cut -d ' ' -f 2)
-          echo "::set-output name=chart::$CHART"
-          echo "::set-output name=version::$VERSION"
+           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
+            CHART=$(basename $(dirname $line))
+            VERSION=$(grep version: $line | cut -d ' ' -f 2)
+            if [ ! -z "$VERSION" ]; then
+              echo "::set-output name=chart::$CHART"
+              echo "::set-output name=version::$VERSION"
+              break
+            fi
+          done
 
       - name: Trigger workflow in another repository
         uses: peter-evans/repository-dispatch@v1
