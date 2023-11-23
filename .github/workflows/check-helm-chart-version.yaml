@@ -16,8 +16,7 @@ jobs:
           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
             CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
             VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
-            echo "$CHART = $VERSION"
-            curl -X POST -H "Authorization: token ${{ secrets.TOKEN }}" \
-                 -d '{"event_type": "chart-update", "client_payload": {"chart": "'$CHART'", "version": "'$VERSION'"}}' \
-                 https://api.github.com/repos/pokabook/xquare-infrastructure-global/dispatches
+            echo "$CHART=$VERSION"
+            echo ${{ secrets.TOKEN }} | gh auth login --with-token
+            gh api repos/my-org/terraform-helm/dispatches --raw-field event_type=chart-update --json client_payload='{"chart": "'$CHART'", "version": "'$VERSION'"}'
           done
