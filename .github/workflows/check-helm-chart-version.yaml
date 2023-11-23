@@ -1,0 +1,28 @@
+name: Check Helm Chart Version
+on:
+  push:
+    paths:
+      - 'charts/**/Chart.yaml'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get chart name and version
+        id: chart
+        run: |
+          CHART=$(basename $(dirname ${{ github.event.head_commit.modified }}))
+          VERSION=$(cat charts/$CHART/Chart.yaml | grep version: | cut -d ' ' -f 2)
+          echo "::set-output name=chart::$CHART"
+          echo "::set-output name=version::$VERSION"
+
+      - name: Trigger workflow in another repository
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.TOKEN }}
+          repository: pokabook/xquare-infrastructure-global
+          event-type: chart-update
+          client-payload: '{"chart": "${{ steps.chart.outputs.chart }}", "version": "${{ steps.chart.outputs.version }}"}'
