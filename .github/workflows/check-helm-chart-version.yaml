@@ -14,9 +14,9 @@ jobs:
       - name: Get chart name and version
         id: chart
         run: |
-           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
-            CHART=$(basename $(dirname $line))
-            VERSION=$(grep version: $line | cut -d ' ' -f 2)
+          git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
+            CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
+            VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
             if [ ! -z "$VERSION" ]; then
               echo "::set-output name=chart::$CHART"
               echo "::set-output name=version::$VERSION"
