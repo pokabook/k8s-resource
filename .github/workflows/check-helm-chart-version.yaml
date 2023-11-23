@@ -11,26 +11,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Get chart name and version
-        id: chart
+      - name: Get updated chart name and version
         run: |
           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
             CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
             VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
-            echo "chart=$CHART" >> "$GITHUB_OUTPUT"
-            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-            if [ ! -z "$VERSION" ]; then
-              break
-            fi
+            echo "$CHART = $VERSION"
+            curl -X POST -H "Authorization: token ${{ secrets.TOKEN }}" \
+                 -d '{"event_type": "chart-update", "client_payload": {"chart": "'$CHART'", "version": "'$VERSION'"}}' \
+                 https://api.github.com/repos/pokabook/xquare-infrastructure-global/dispatches
           done
-
-      - name: Trigger workflow in another repository
-        uses: peter-evans/repository-dispatch@v2
-        run: |
-          echo ${{ steps.chart.outputs.chart }}
-          echo ${{ steps.chart.outputs.version }}
-        with:
-          token: ${{ secrets.TOKEN }}
-          repository: pokabook/xquare-infrastructure-global
-          event-type: chart-update
-          client-payload: '{"chart": "${{ steps.chart.outputs.chart }}", "version": "${{ steps.chart.outputs.version }}"}'
