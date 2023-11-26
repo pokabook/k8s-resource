@@ -32,14 +32,15 @@ jobs:
     trategy:
       matrix: ${{fromJson(needs.check-version.outputs.matrix)}}
    
-   - name: Repository Dispatch
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ env.XQUARE_ACTION_GHP_TOKEN }}
-        repository: pokabook/xquare-infrastructure-global
-        event-type: chart-update
-        client-payload: |
-          {
-            "chart" : "${{ matrix.chart }}", 
-            "image_tag" : "$${{ matrix.version }}"
-          }
+    steps:
+      - name: Repository Dispatch
+          uses: peter-evans/repository-dispatch@v1
+          with:
+            token: ${{ env.XQUARE_ACTION_GHP_TOKEN }}
+            repository: pokabook/xquare-infrastructure-global
+            event-type: chart-update
+            client-payload: |
+              {
+                "chart" : "${{ matrix.chart }}", 
+                "image_tag" : "$${{ matrix.version }}"
+              }
