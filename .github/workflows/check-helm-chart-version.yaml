@@ -39,8 +39,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-    matrix:
-      chart: ${{fromJson(needs.check-version.outputs.charts)}}
+      matrix:
+        chart: ${{fromJson(needs.check-version.outputs.charts)}}
    
     steps:
       - name: Repository Dispatch
