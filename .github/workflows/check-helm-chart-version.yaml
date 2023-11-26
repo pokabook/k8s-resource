@@ -22,9 +22,13 @@ jobs:
           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
               CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
               VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
+
+              if [ -z "$CHART" ] || [ -z "$VERSION" ]; then
+                  continue
+              fi
+
               echo "$CHART=$VERSION" >> matrix.txt
           done
-          echo "::set-output name=matrix::$(jq -R -s -c 'split("\n") | map(split("=")) | map({(.[0]): .[1]}) | add' matrix.txt)"
 
   dispatches:
     needs: check-version
