@@ -38,7 +38,7 @@ jobs:
     needs: check-version
     runs-on: ubuntu-latest
     strategy:
-    fail-fast: false
+      fail-fast: false
     matrix:
       chart: ${{fromJson(needs.check-version.outputs.charts)}}
    
