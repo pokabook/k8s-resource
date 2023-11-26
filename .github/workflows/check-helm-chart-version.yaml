@@ -29,7 +29,9 @@ jobs:
 
               echo "$CHART=$VERSION" >> matrix.txt
           done
+          cat matrix.txt
           MATRIX=$(jq -R -s -c 'split("\n") | map(split("=")) | map({(.[0]): .[1]}) | add' matrix.txt || echo "{}")
+          cat matrix.txt
           echo "::set-output name=matrix::$MATRIX"
           echo "Matrix: $MATRIX"
 
