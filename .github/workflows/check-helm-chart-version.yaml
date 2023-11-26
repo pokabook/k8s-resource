@@ -27,10 +27,10 @@ jobs:
                   continue
               fi
 
-              echo "$CHART=$VERSION" >> matrix.txt
+              echo "$CHART=$VERSION" >> matrix.json
           done
-          cat matrix.txt
-          MATRIX=$(awk -F'=' '{print "\"" $1 "\": \"" $2 "\""}' matrix.txt | paste -sd, - | sed 's/^/{/;s/$/}/')
+          cat matrix.json
+          MATRIX=$(awk -F'=' '{print "\"" $1 "\": \"" $2 "\""}' matrix.json | paste -sd, - | sed 's/^/{/;s/$/}/')
           echo "::set-output name=matrix::$MATRIX"
           echo "Matrix: $MATRIX"
 
