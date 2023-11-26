@@ -29,6 +29,9 @@ jobs:
 
               echo "$CHART=$VERSION" >> matrix.txt
           done
+          MATRIX=$(jq -R -s -c 'split("\n") | map(split("=")) | map({(.[0]): .[1]}) | add' matrix.txt || echo "{}")
+          echo "::set-output name=matrix::$MATRIX"
+          echo "Matrix: $MATRIX"
 
   dispatches:
     needs: check-version
