@@ -19,7 +19,7 @@ jobs:
       - name: Get updated chart name and version
         id: charts
         run: |
-          git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
+           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
               CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
               VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
 
@@ -27,13 +27,12 @@ jobs:
                   continue
               fi
 
-              echo "$CHART=$VERSION" >> matrix.json
+              echo "{\"chart\":\"$CHART\", \"version\":\"$VERSION\"}" >> matrix.json
           done
           cat matrix.json
-          MATRIX=$(awk -F'=' '{print "\"" $1 "\": \"" $2 "\""}' matrix.json | paste -sd, - | sed 's/^/{/;s/$/}/')
-          echo "::set-output name=matrix::$MATRIX"
+          MATRIX=$(echo "["; cat matrix.json | paste -sd, -; echo "]")
           echo "Matrix: $MATRIX"
-
+          
   dispatches:
     needs: check-version
     runs-on: ubuntu-latest
@@ -46,11 +45,11 @@ jobs:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{ env.XQUARE_ACTION_GHP_TOKEN }}
+          token: ${{ secrets.TOKEN }}
           repository: pokabook/xquare-infrastructure-global
           event-type: chart-update
           client-payload: |
             {
               "chart" : "${{ matrix.chart }}", 
-              "image_tag" : "$${{ matrix.version }}"
+              "version" : "$${{ matrix.version }}"
             }
