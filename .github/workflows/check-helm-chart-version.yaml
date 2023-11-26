@@ -8,8 +8,6 @@ on:
 jobs:
   check-version:
     runs-on: ubuntu-latest
-    outputs:
-      charts: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -17,7 +15,6 @@ jobs:
           fetch-depth: 2
 
       - name: Get updated chart name and version
-        id: charts
         run: |
           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
               CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
@@ -29,26 +26,36 @@ jobs:
 
               echo "$CHART=$VERSION" >> matrix.txt
           done
-          
+        shell: bash
+
+      - name: Upload matrix.txt
+        uses: actions/upload-artifact@v2
+        with:
+          name: matrix
+          path: matrix.txt
+
   dispatches:
     needs: check-version
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Download matrix.txt
+        uses: actions/download-artifact@v2
+        with:
+          name: matrix
+
       - name: Send Repository Dispatches
         run: |
           while IFS='=' read -r CHART VERSION; do
-            echo "Processing $CHART version $VERSION"
             echo "::set-output name=chart::$CHART"
             echo "::set-output name=version::$VERSION"
-            echo ""
-          done < matrix.txt
+          done < matrix/matrix.txt
         id: matrix
+        shell: bash
+
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{ env.XQUARE_ACTION_GHP_TOKEN }}
+          token: ${{ secrets.TOKEN }}
           repository: pokabook/xquare-infrastructure-global
           event-type: chart-update
           client-payload: |
