@@ -14,45 +14,19 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Get updated chart name and version
+      - name: Get updated chart names and versions
+        id: get_chart_info
         run: |
           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
-              CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
-              VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
-
-              if [ -z "$CHART" ] || [ -z "$VERSION" ]; then
-                  continue
-              fi
-
-              echo "$CHART=$VERSION" >> matrix.txt
-          done
-        shell: bash
-
-      - name: Upload matrix.txt
-        uses: actions/upload-artifact@v2
-        with:
-          name: matrix
-          path: matrix.txt
-
-  dispatches:
-    needs: check-version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download matrix.txt
-        uses: actions/download-artifact@v2
-        with:
-          name: matrix
-
-      - name: Send Repository Dispatches
-        run: |
-          while IFS='=' read -r CHART VERSION; do
+            CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
+            VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
             echo "::set-output name=chart::$CHART"
             echo "::set-output name=version::$VERSION"
-          done < matrix/matrix.txt
-        id: matrix
-        shell: bash
+            echo "CHART: $CHART, VERSION: $VERSION"
+          done
 
       - name: Repository Dispatch
+        id: dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.TOKEN }}
@@ -60,6 +34,6 @@ jobs:
           event-type: chart-update
           client-payload: |
             {
-              "chart" : "${{ steps.matrix.outputs.chart }}",
-              "version" : "${{ steps.matrix.outputs.version }}"
+              "chart": "${{ steps.get_chart_info.outputs.chart }}",
+              "version":"${{ steps.get_chart_info.outputs.version }}"
             }
