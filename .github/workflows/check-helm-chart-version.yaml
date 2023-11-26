@@ -9,7 +9,7 @@ jobs:
   check-version:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      charts: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -38,7 +38,9 @@ jobs:
     needs: check-version
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{fromJson(needs.check-version.outputs.matrix)}}
+    fail-fast: false
+    matrix:
+      chart: ${{fromJson(needs.check-version.outputs.charts)}}
    
     steps:
       - name: Repository Dispatch
