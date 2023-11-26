@@ -8,32 +8,34 @@ on:
 jobs:
   check-version:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
 
-      - name: Get updated chart names and versions
-        id: get_chart_info
+      - name: Identify updated charts
+        id: set-matrix
         run: |
-          git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
+          CHARTS=$(git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
             CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
             VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
-            echo "::set-output name=chart::$CHART"
-            echo "::set-output name=version::$VERSION"
-            echo "CHART: $CHART, VERSION: $VERSION"
-          done
+            echo "{\"chart\":\"$CHART\", \"version\":\"$VERSION\"},"
+          done | sed 's/.$//')
+          echo "::set-output name=matrix::{\"include\":[$CHARTS]}"
 
+  repository-dispatch:
+    needs: check-version
+    strategy:
+      matrix: ${{fromJson(needs.check-version.outputs.matrix)}}
+    runs-on: ubuntu-latest
+    steps:
       - name: Repository Dispatch
-        id: dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.TOKEN }}
-          repository: pokabook/xquare-infrastructure-global
+          repository: team-xquare/xquare-infrastructure-global
           event-type: chart-update
-          client-payload: |
-            {
-              "chart": "${{ steps.get_chart_info.outputs.chart }}",
-              "version":"${{ steps.get_chart_info.outputs.version }}"
-            }
+          client-payload: '{"chart": "${{ matrix.chart }}", "version": "${{ matrix.version }}" }'
