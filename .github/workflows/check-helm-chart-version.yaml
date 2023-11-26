@@ -28,10 +28,10 @@ jobs:
               fi
 
               echo "{\"chart\":\"$CHART\", \"version\":\"$VERSION\"}" >> matrix.json
-          done
-          cat matrix.json
-          MATRIX=$(echo "["; cat matrix.json | paste -sd, -; echo "]")
-          echo $MATRIX
+           done
+           cat matrix.json
+           MATRIX=$(echo "["; cat matrix.json | paste -sd, -; echo "]")
+           echo $MATRIX
           
   dispatches:
     needs: check-version
