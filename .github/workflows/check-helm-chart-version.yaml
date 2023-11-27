@@ -26,6 +26,7 @@ jobs:
             jq '.include += [{"chart":"$CHART","version":"$VERSION"}]' test.json > temp.json && mv temp.json test.json
           done
           echo "charts=$(jq -c . < ./test.json)" >> $GITHUB_OUTPUT
+          echo $charts
 
   repository-dispatch:
     needs: check-version
