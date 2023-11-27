@@ -23,7 +23,7 @@ jobs:
           git diff --name-only HEAD^ HEAD | grep Chart.yaml | while read line; do
             CHART=$(grep '^name: ' $line | cut -d ' ' -f 2)
             VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
-            jq '.include += [{"chart":"$CHART","version":"$VERSION"}]' test.json > temp.json && mv temp.json test.json
+            jq --arg CHART "$CHART" --arg VERSION "$VERSION" '.include += [{"chart":"$CHART","version":"$VERSION"}]' test.json > temp.json && mv temp.json test.json
           done
           echo "charts=$(jq -c . < ./test.json)" >> $GITHUB_OUTPUT
           cat test.json
