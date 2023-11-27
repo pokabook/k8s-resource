@@ -9,7 +9,7 @@ jobs:
   check-version:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.check-version.outputs.charts }}
+      charts: ${{ steps.check-version.outputs.charts }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -25,7 +25,7 @@ jobs:
             VERSION=$(grep '^version: ' $line | cut -d ' ' -f 2)
             jq '.include += [{"chart":"$CHART","version":"$VERSION"}]' test.json > temp.json && mv temp.json test.json
           done
-          echo "charts=test.json" >> $GITHUB_OUTPUT
+          echo "charts=$(jq -c . < ./test.json)" >> $GITHUB_OUTPUT
 
   repository-dispatch:
     needs: check-version
