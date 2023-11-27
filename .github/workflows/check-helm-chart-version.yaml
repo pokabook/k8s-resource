@@ -41,6 +41,6 @@ jobs:
           event-type: chart-update
           client-payload: |
             {
-              "chart": "${{ charts.chart }}",
-              "version": "${{ charts.version }}"
+              "chart": "${{ matrix.chart }}",
+              "version": "${{ matrix.version }}"
             }
